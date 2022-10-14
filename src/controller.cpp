@@ -3,6 +3,7 @@
 //
 
 #include "controller.hpp"
+#include <imgui.h>
 
 namespace leking {
     void Controller::moveInPlaneXZ(GLFWwindow *window, float dt, KanGameObject &gameObject) {
@@ -20,6 +21,7 @@ namespace leking {
             onDrop = true;
         }
         if(onDrop) {
+            ImGui::SetMouseCursor(ImGuiMouseCursor_None);
             CursorPos newCursorPos{};
             glfwGetCursorPos(window, &newCursorPos.x, &newCursorPos.y);
             glfwSetCursorPos(window, clickPos.x,clickPos.y);

@@ -24,5 +24,8 @@ void main()
 {
     vec3 color = texture(tex1,texCoord).xyz;
     float lightIntensity = AMBIENT + max(dot(inNormalWorld, sceneData.sunlightDirection.xyz),0.2);
-    outFragColor = lightIntensity * vec4(color,1.0f);
+    vec3 lightColor = sceneData.sunlightColor.xyz * sceneData.sunlightColor.w;
+    vec3 ambientLight = sceneData.ambientColor.xyz * sceneData.ambientColor.w;
+    vec3 diffuseLight = lightColor * max(dot(normalize(inNormalWorld), normalize(sceneData.sunlightDirection.xyz)),0);
+    outFragColor = vec4((diffuseLight + ambientLight) * color,1.0f);
 }

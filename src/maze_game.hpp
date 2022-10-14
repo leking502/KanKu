@@ -1,5 +1,5 @@
 //
-// Created by Kaning on 22-10-1.
+// Created by leking on 22-10-1.
 //
 
 #ifndef KanENGINE_MAZE_GAME_HPP
@@ -70,6 +70,10 @@ namespace leking {
 
         bool startSolveMaze{false};
 
+        bool noSolve{ false };
+
+        bool tooBig{ false };
+
         bool solvedSuccessfully{false};
 
         bool autoMod{false};
@@ -90,6 +94,6 @@ namespace leking {
         void SolveMaze();
     };
 
-} // Kaning
+} // leking
 
 #endif //KanENGINE_MAZE_GAME_HPP

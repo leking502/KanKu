@@ -54,7 +54,7 @@ namespace leking {
             kanSwapChain = std::make_unique<KanSwapChain>(kanDevice, extent, oldSwapChain);
 
             if(!oldSwapChain->compareSwapFormats(*kanSwapChain.get())) {
-                throw std::runtime_error("交换链图像或深度格式发生变化");
+                throw std::runtime_error("Exchange chain image or depth format changes");
             }
         }
 
@@ -71,7 +71,7 @@ namespace leking {
         allocInfo.commandBufferCount = static_cast<uint32_t >(commandBuffers.size());
 
         if(vkAllocateCommandBuffers(kanDevice.Device(), &allocInfo, commandBuffers.data()) !=  VK_SUCCESS) {
-            throw std::runtime_error("分配命令缓冲区失败");
+            throw std::runtime_error("Failed to allocate command buffer");
         }
     }
 
@@ -87,7 +87,7 @@ namespace leking {
 
 
     VkCommandBuffer KanRenderer::beginFrame() {
-        assert(!isFrameStarted && "不可以在帧已经在程序的情况下调用开始帧");
+        assert(!isFrameStarted && "The start frame cannot be called when the frame is already in the program");
 
         auto result = kanSwapChain->acquireNextImage(&currentImageIndex);
 
@@ -96,7 +96,7 @@ namespace leking {
             return nullptr;
         }
         if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-            throw std::runtime_error("无法获得交换链图像");
+            throw std::runtime_error("Unable to obtain the exchange chain image");
         }
 
         isFrameStarted = true;
@@ -106,16 +106,16 @@ namespace leking {
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
         if(vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
-            throw std::runtime_error("开始记录命令缓冲区失败");
+            throw std::runtime_error("Failed to start logging command buffer");
         }
         return commandBuffer;
     }
 
     void KanRenderer::endFrame() {
-        assert(isFrameStarted && "不可以在帧不在程序的时候调用结束帧");
+        assert(isFrameStarted && "The end frame cannot be called when the frame is not in the program");
         auto commandBuffer = getCurrentCommandBuffer();
         if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
-            throw std::runtime_error("记录命令缓冲区失败");
+            throw std::runtime_error("Failed to log command buffer");
         }
         auto result = kanSwapChain->submitCommandBuffers(&commandBuffer ,&currentImageIndex);
         if(result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || kanWindow.wasWindowResized()) {
@@ -123,7 +123,7 @@ namespace leking {
             recreateSwapChain();
         }
         else if (result != VK_SUCCESS) {
-            throw std::runtime_error("提交交换链图像失败");
+            throw std::runtime_error("Failed to submit the exchange chain image");
         }
 
         isFrameStarted = false;
@@ -131,8 +131,8 @@ namespace leking {
     }
 
     void KanRenderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer) {
-        assert(isFrameStarted && "不可以在帧不在程序的时候调用开始交换链渲染通道");
-        assert(commandBuffer == getCurrentCommandBuffer() &&"开始渲染不可以在不同的帧上传递给命令缓冲区");
+        assert(isFrameStarted && "It is not allowed to call the start exchange chain rendering channel when the frame is not in the program");
+        assert(commandBuffer == getCurrentCommandBuffer() &&"Start rendering cannot be passed to the command buffer at different frames");
 
         VkRenderPassBeginInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -143,7 +143,7 @@ namespace leking {
         renderPassInfo.renderArea.extent = kanSwapChain->getSwapChainExtent();
 
         std::array<VkClearValue, 2> clearValues{};
-        clearValues[0].color = {0.0f, 0.0f, 0.0f, 1.0f};
+        clearValues[0].color = {0.3f, 0.3f, 0.3f, 1.0f};
         clearValues[1].depthStencil = {1.0f, 0};
         renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
         renderPassInfo.pClearValues = clearValues.data();

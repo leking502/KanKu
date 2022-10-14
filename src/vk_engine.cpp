@@ -77,6 +77,8 @@ void VulkanEngine::mainLoop() {
     viewerObject.transform.translation = { mw/2.f,-1.2*glm::max(mw,mh),(mh/2.f)-4.f };
     viewerObject.transform.rotation = { -glm::half_pi<float>(),0.0f,0.0f};
 
+    bool firstpass = false;
+
 
     while(!glfwWindowShouldClose(kanWindow.getGLFWwindow())) {
         glfwPollEvents();
@@ -92,17 +94,25 @@ void VulkanEngine::mainLoop() {
 
         ImGui::NewFrame();
 
-        ImGui::SetWindowPos({0,0});
+        cameraController.moveInPlaneXZ(kanWindow.getGLFWwindow(), frameTime, viewerObject);
 
-        ImGui::Text("Kanku");
-        ImGui::InputInt(u8"宽",&mw);
-        ImGui::InputInt(u8"高",&mh);
+        ImGui::Begin(u8"Kanku引擎");
+        if (!firstpass) {
+            ImGui::SetWindowPos({ 0,0 });
+            auto ex = kanWindow.getExtent();
+            float sww = ex.width / 4;
+            float swh = ex.height;
+            ImGui::SetWindowSize({ sww, swh });
+            firstpass = true;
+        }
+        ImGui::InputInt(u8"迷宫宽度",&mw);
+        ImGui::InputInt(u8"迷宫长度",&mh);
 
         //进入帧
         if(auto  commandBuffer = kanRenderer->beginFrame()) {
             //相机设置
             {
-                cameraController.moveInPlaneXZ(kanWindow.getGLFWwindow(), frameTime, viewerObject);
+
                 camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
 
                 float aspect = kanRenderer->getAspectRatio();
@@ -120,6 +130,7 @@ void VulkanEngine::mainLoop() {
                 vmaUnmapMemory(kanDevice.Allocator(), cameraBuffers[kanRenderer->getFrameIndex()].allocation);
             }
             mazeGameManager.Update(kanWindow.getGLFWwindow(), frameTime);
+            ImGui::End();
 
             kanRenderer->beginSwapChainRenderPass(commandBuffer);
             ImGui::Render();
@@ -131,6 +142,7 @@ void VulkanEngine::mainLoop() {
             kanRenderer->endFrame();
             frameNumber+=1;
         }
+
     }
 }
 

@@ -1,5 +1,5 @@
 //
-// Created by Kaning on 22-10-1.
+// Created by leking on 22-10-1.
 //
 
 #include <cstring>
@@ -75,30 +75,56 @@ namespace leking {
             width = srcWidth;
             height = srcHeight;
             if(width > 100 || height > 100) {
+                tooBig = true;
                 return;
             }
+            tooBig = false;
             RefreshMaze();
             CreateMaze();
+            noSolve = false;
             mazeRouteStack = {};
             solvedSuccessfully = false;
             startSolveMaze = false;
             autoMod = false;
         }
-        if(ImGui::Button(u8"自动求解")) {
+        if(!autoMod && ImGui::Button(u8"自动求解")) {
             autoMod = true;
+        }
+        if(autoMod && ImGui::Button(u8"停止自动求解")) {
+            autoMod = false;
+        }
+        ImGui::SetNextItemOpen(true);
+        if (ImGui::CollapsingHeader(u8"使用说明")) {
+            ImGui::Text(u8"L键：单步执行");
+            ImGui::Text(u8"R键：重置迷宫");
+            ImGui::Text(u8"鼠标右键拖动：改变视角");
+            ImGui::Text(u8"WASD：前后左右移动");
+            ImGui::Text(u8"空格：上升");
+            ImGui::Text(u8"左shift：下降");
         }
 
         if(glfwGetKey(window, keys.resetMaze) == GLFW_PRESS && !onRefresh && !autoMod) {
             onRefresh = true;
             RefreshMaze();
             CreateMaze();
-            //std::cout<<gameObjects.size()<<endl;
         }
         else if(glfwGetKey(window, keys.resetMaze) == GLFW_RELEASE && onRefresh && !autoMod) {
             mazeRouteStack = {};
+            noSolve = false;
             solvedSuccessfully = false;
             startSolveMaze = false;
             onRefresh = false;
+        }
+        ImGui::SetNextItemOpen(true);
+        if (ImGui::CollapsingHeader(u8"错误信息",ImGuiCond_Always)) {
+            if (noSolve) {
+                ImGui::BulletText(u8"迷宫无解");
+                if (autoMod) autoMod = false;
+                return;
+            }
+            if (tooBig) {
+                ImGui::BulletText(u8"长度或宽度不能超过100");
+            }
         }
 //        if(glfwGetKey(window, keys.autoSolveMaze) == GLFW_PRESS && !autoMod) {
 //            autoMod = true;
@@ -167,6 +193,7 @@ namespace leking {
                 return;
         }
         if(mazeRouteStack.Size() == 0 && startSolveMaze) {
+            noSolve = true;
             mazeRouteStack = {};
             startSolveMaze = false;
             std::cout<<"no solve"<<std::endl;
